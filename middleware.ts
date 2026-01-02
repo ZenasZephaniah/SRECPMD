@@ -2,34 +2,22 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  // 1. Check for Basic Auth header
-  const basicAuth = req.headers.get('authorization');
-  const url = req.nextUrl;
+  const token = req.cookies.get('auth_token');
+  const { pathname } = req.nextUrl;
 
-  // 2. Define your dummy credentials
-  // Requirement: "Eligible admins can access"
-  const user = 'admin';
-  const pwd = 'password123';
-
-  if (basicAuth) {
-    const authValue = basicAuth.split(' ')[1];
-    const [u, p] = atob(authValue).split(':');
-
-    if (u === user && p === pwd) {
-      return NextResponse.next();
-    }
+  // If trying to access dashboard ('/') without token, go to login
+  if (pathname === '/' && !token) {
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  // 3. If not logged in, show the login prompt
-  url.pathname = '/api/auth';
-  return new NextResponse('Auth Required', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="Secure Dashboard"',
-    },
-  });
+  // If already logged in and trying to access login, go to dashboard
+  if (pathname === '/login' && token) {
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/'], // Protects the home page
+  matcher: ['/', '/login'],
 };

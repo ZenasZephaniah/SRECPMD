@@ -1,119 +1,115 @@
-"use client";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { CldUploadWidget } from 'next-cloudinary';
+import { z } from 'zod';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation"; // Import the router
+// 1. Define Zod Schema (Strong Validation)
+const productSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  price: z.coerce.number().min(1, "Price must be at least $1"),
+  stock: z.coerce.number().min(0, "Stock cannot be negative"),
+  description: z.string().min(10, "Description must be at least 10 chars"),
+});
 
 export default function ProductForm() {
-  const router = useRouter(); // Initialize router
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    category: "",
-    price: "",
-    stock: "",
-    description: "",
-    imageUrl: "",
-  });
-
-  const handleChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const router = useRouter();
+  const [formData, setFormData] = useState({ name: '', price: '', stock: '', description: '', imageUrl: '' });
+  const [errors, setErrors] = useState<any>({});
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    setLoading(true);
-
-    try {
-      const res = await fetch("/api/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+    
+    // 2. Validate using Zod
+    const result = productSchema.safeParse(formData);
+    if (!result.success) {
+      const formattedErrors: any = {};
+      result.error.issues.forEach((issue) => {
+        formattedErrors[issue.path[0]] = issue.message;
       });
+      setErrors(formattedErrors);
+      return;
+    }
+    setErrors({}); // Clear errors if valid
 
-      if (res.ok) {
-        // Clear form
-        setFormData({
-          name: "",
-          category: "",
-          price: "",
-          stock: "",
-          description: "",
-          imageUrl: "",
-        });
-        
-        // CRITICAL: Refresh the page data automatically
-        router.refresh(); 
-      } else {
-        const errorData = await res.json();
-        alert(`Error: ${errorData.error || "Failed to save product"}`);
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
+    // 3. Submit to Server
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      body: JSON.stringify(formData),
+    });
+
+    if (res.ok) {
+      router.refresh();
+      setFormData({ name: '', price: '', stock: '', description: '', imageUrl: '' });
+      alert('Product Saved!');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-      <h3 className="text-xl font-bold text-gray-800 mb-4">+ Add New Product</h3>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <input
-          name="name"
-          placeholder="Product Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="border p-3 rounded-lg w-full"
-          required
-        />
-        <input
-          name="category"
-          placeholder="Category"
-          value={formData.category}
-          onChange={handleChange}
-          className="border p-3 rounded-lg w-full"
-        />
-        <input
-          name="price"
-          type="number"
-          placeholder="Price ($)"
-          value={formData.price}
-          onChange={handleChange}
-          className="border p-3 rounded-lg w-full"
-          required
-        />
-        <input
-          name="stock"
-          type="number"
-          placeholder="Stock Qty"
-          value={formData.stock}
-          onChange={handleChange}
-          className="border p-3 rounded-lg w-full"
-          required
-        />
-      </div>
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={formData.description}
-        onChange={handleChange}
-        className="border p-3 rounded-lg w-full mb-4 h-24"
-      />
-      
-      {/* Upload Button Placeholder - Logic assumed separate */}
-      <button type="button" className="bg-gray-100 text-gray-600 px-4 py-2 rounded mb-4 hover:bg-gray-200">
-         Upload Image
-      </button>
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <h3 className="text-xl font-bold mb-4">+ Add Product (Multi-Step Capable)</h3>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        
+        {/* Step 1: Basic Info */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <input 
+              placeholder="Name" 
+              value={formData.name}
+              onChange={e => setFormData({...formData, name: e.target.value})}
+              className="w-full border p-2 rounded"
+            />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+          </div>
+          <div>
+            <input 
+              placeholder="Price" type="number"
+              value={formData.price}
+              onChange={e => setFormData({...formData, price: e.target.value})}
+              className="w-full border p-2 rounded"
+            />
+            {errors.price && <p className="text-red-500 text-sm">{errors.price}</p>}
+          </div>
+        </div>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
-      >
-        {loading ? "Saving..." : "Save Product"}
-      </button>
-    </form>
+        {/* Step 2: Details */}
+        <div>
+          <input 
+            placeholder="Stock" type="number"
+            value={formData.stock}
+            onChange={e => setFormData({...formData, stock: e.target.value})}
+            className="w-full border p-2 rounded"
+          />
+          {errors.stock && <p className="text-red-500 text-sm">{errors.stock}</p>}
+        </div>
+
+        <textarea 
+          placeholder="Description"
+          value={formData.description}
+          onChange={e => setFormData({...formData, description: e.target.value})}
+          className="w-full border p-2 rounded h-24"
+        />
+        {errors.description && <p className="text-red-500 text-sm">{errors.description}</p>}
+
+        {/* Step 3: Image Upload (Restored) */}
+        <CldUploadWidget 
+          uploadPreset="ml_default" // Ensure you have an unsigned preset in Cloudinary
+          onSuccess={(result: any) => {
+            setFormData(prev => ({ ...prev, imageUrl: result.info.secure_url }));
+          }}
+        >
+          {({ open }) => (
+            <button type="button" onClick={() => open()} className="bg-gray-200 px-4 py-2 rounded text-sm">
+              {formData.imageUrl ? "✅ Image Uploaded" : "⬆️ Upload Image"}
+            </button>
+          )}
+        </CldUploadWidget>
+
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+          Save Product
+        </button>
+      </form>
+    </div>
   );
 }

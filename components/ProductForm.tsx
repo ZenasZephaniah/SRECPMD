@@ -45,7 +45,8 @@ export default function ProductForm() {
         // CRITICAL: Refresh the page data automatically
         router.refresh(); 
       } else {
-        alert("Failed to save product");
+        const errorData = await res.json();
+        alert(`Error: ${errorData.error || "Failed to save product"}`);
       }
     } catch (error) {
       console.error(error);

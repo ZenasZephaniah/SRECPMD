@@ -1,26 +1,56 @@
+import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
-import { NextResponse } from "next/server";
 
-export async function GET() {
+// POST: Create a new product
+export async function POST(req: Request) {
   try {
+    // 1. Parse the incoming data
+    const body = await req.json();
+    const { name, category, price, stock, description, imageUrl } = body;
+
+    // 2. Validate data (Simple check)
+    if (!name || !price || !stock) {
+      return NextResponse.json(
+        { error: "Name, Price, and Stock are required" },
+        { status: 400 }
+      );
+    }
+
+    // 3. Connect to Database
     await connectDB();
-    // Fetch all products, newest first
-    const products = await Product.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(products);
+
+    // 4. Create the Product
+    const newProduct = await Product.create({
+      name,
+      category,
+      price,
+      stock,
+      description,
+      imageUrl,
+    });
+
+    // 5. Return success
+    return NextResponse.json(newProduct, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    console.error("Error creating product:", error);
+    return NextResponse.json(
+      { error: "Failed to create product" },
+      { status: 500 }
+    );
   }
 }
 
-export async function POST(req: Request) {
+// GET: Fetch all products (API version)
+export async function GET() {
   try {
     await connectDB();
-    const body = await req.json();
-    // Create new product
-    const product = await Product.create(body);
-    return NextResponse.json(product, { status: 201 });
+    const products = await Product.find({}).sort({ createdAt: -1 });
+    return NextResponse.json(products);
   } catch (error) {
-    return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 }
+    );
   }
 }

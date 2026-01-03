@@ -1,76 +1,72 @@
 "use client";
-
-import { Trash2 } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function ProductList({ products }: { products: any[] }) {
   const router = useRouter();
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
-    
-    await fetch(`/api/products/${id}`, { method: "DELETE" });
-    router.refresh(); // Refreshes the page to show new data
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    await fetch(`/api/products/${deleteId}`, { method: "DELETE" });
+    setDeleteId(null);
+    router.refresh();
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-      <table className="w-full text-left">
-        <thead className="bg-gray-50 text-gray-700">
-          <tr>
-            <th className="p-4">Product</th>
-            <th className="p-4">Price</th>
-            <th className="p-4">Stock</th>
-            <th className="p-4">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product._id} className="border-t hover:bg-gray-50 transition">
-              <td className="p-4 flex items-center gap-3">
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 border">
-                  {product.imageUrl && (
-                    <Image 
-                      src={product.imageUrl} 
-                      alt={product.name} 
-                      fill 
-                      className="object-cover" 
-                    />
-                  )}
-                </div>
-                <div>
-                  <p className="font-semibold text-gray-900">{product.name}</p>
-                  <p className="text-xs text-gray-500">{product.category}</p>
-                </div>
-              </td>
-              <td className="p-4 font-medium">${product.price}</td>
-              <td className="p-4">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  product.stock > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
-                  {product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
-                </span>
-              </td>
-              <td className="p-4">
-                <button 
-                  onClick={() => handleDelete(product._id)} 
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </td>
-            </tr>
-          ))}
-          {products.length === 0 && (
+    <>
+      {/* ID added for Sidebar scrolling */}
+      <div id="product-list" className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead className="bg-gray-50 text-gray-600 font-medium text-sm">
             <tr>
-              <td colSpan={4} className="p-8 text-center text-gray-400">
-                No products found. Add one above!
-              </td>
+              <th className="p-4">Product</th>
+              <th className="p-4">Category</th> {/* New Column */}
+              <th className="p-4">Price</th>
+              <th className="p-4">Stock</th>
+              <th className="p-4 text-right">Action</th>
             </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody className="divide-y divide-gray-100 text-sm">
+            {products.length === 0 ? (
+              <tr><td colSpan={5} className="p-8 text-center text-gray-500">No products found.</td></tr>
+            ) : products.map((product) => (
+              <tr key={product._id} className="hover:bg-gray-50 transition-colors">
+                <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-xl overflow-hidden">
+                    {product.imageUrl ? <img src={product.imageUrl} className="w-full h-full object-cover" /> : '📦'}
+                  </div>
+                  <span>{product.name}</span>
+                </td>
+                <td className="p-4 text-gray-500">{product.category || '-'}</td> {/* Shows Category */}
+                <td className="p-4 font-semibold">${product.price}</td>
+                <td className="p-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${product.stock > 10 ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
+                    {product.stock} left
+                  </span>
+                </td>
+                <td className="p-4 text-right">
+                  <button onClick={() => setDeleteId(product._id)} className="text-gray-400 hover:text-red-600 p-2">🗑️</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Custom Delete Modal (No Alerts) */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full mx-4 animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete this product?</h3>
+            <p className="text-gray-500 mb-6 text-sm">This action cannot be undone.</p>
+            <div className="flex gap-3 justify-end">
+              <button onClick={() => setDeleteId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm font-medium">Cancel</button>
+              <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium">Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

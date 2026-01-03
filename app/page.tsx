@@ -25,7 +25,7 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       
-      {/* Sidebar - FIXED LINKS */}
+      {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 hidden lg:block fixed h-full z-10">
         <div className="p-6">
           <div className="w-8 h-8 bg-blue-600 rounded-lg mb-8 shadow-sm"></div>
@@ -35,6 +35,10 @@ export default async function Home() {
             </a>
             <a href="#product-list" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
               📦 <span>Products</span>
+            </a>
+            {/* NEW SALES LINK */}
+            <a href="#sales-chart" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+              📈 <span>Sales</span>
             </a>
             <a href="#customers" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
               👥 <span>Customers</span>
@@ -73,11 +77,11 @@ export default async function Home() {
 
           {/* Form & Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 h-full">
               <ProductForm />
             </div>
-            <div className="lg:col-span-2">
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full">
+            <div className="lg:col-span-2 h-full">
+              <div id="sales-chart" className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full">
                 <DashboardChart products={products} />
               </div>
             </div>
@@ -91,7 +95,6 @@ export default async function Home() {
             <ProductList products={products} />
           </div>
 
-          {/* Dummy Customers Section for Sidebar Link */}
           <div id="customers" className="mt-12 p-8 text-center text-gray-400 border-t">
             <p>Customer Management Module (Coming Soon)</p>
           </div>

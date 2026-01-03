@@ -15,13 +15,13 @@ export default function ProductList({ products }: { products: any[] }) {
 
   return (
     <>
-      {/* ID added for Sidebar scrolling */}
       <div id="product-list" className="overflow-x-auto">
         <table className="w-full text-left">
           <thead className="bg-gray-50 text-gray-600 font-medium text-sm">
             <tr>
               <th className="p-4">Product</th>
-              <th className="p-4">Category</th> {/* New Column */}
+              <th className="p-4">Category</th>
+              <th className="p-4">Sales</th> {/* NEW COLUMN */}
               <th className="p-4">Price</th>
               <th className="p-4">Stock</th>
               <th className="p-4 text-right">Action</th>
@@ -29,7 +29,7 @@ export default function ProductList({ products }: { products: any[] }) {
           </thead>
           <tbody className="divide-y divide-gray-100 text-sm">
             {products.length === 0 ? (
-              <tr><td colSpan={5} className="p-8 text-center text-gray-500">No products found.</td></tr>
+              <tr><td colSpan={6} className="p-8 text-center text-gray-500">No products found.</td></tr>
             ) : products.map((product) => (
               <tr key={product._id} className="hover:bg-gray-50 transition-colors">
                 <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
@@ -38,7 +38,8 @@ export default function ProductList({ products }: { products: any[] }) {
                   </div>
                   <span>{product.name}</span>
                 </td>
-                <td className="p-4 text-gray-500">{product.category || '-'}</td> {/* Shows Category */}
+                <td className="p-4 text-gray-500">{product.category || '-'}</td>
+                <td className="p-4 font-semibold text-purple-600">{product.sales || 0}</td> {/* SALES DATA */}
                 <td className="p-4 font-semibold">${product.price}</td>
                 <td className="p-4">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${product.stock > 10 ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
@@ -54,7 +55,7 @@ export default function ProductList({ products }: { products: any[] }) {
         </table>
       </div>
 
-      {/* Custom Delete Modal (No Alerts) */}
+      {/* Delete Modal */}
       {deleteId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-xl max-w-sm w-full mx-4 animate-in zoom-in-95">

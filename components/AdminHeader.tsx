@@ -9,8 +9,9 @@ export default function AdminHeader() {
 
   const handleLogout = async () => {
     try {
+      // 1. Kill the cookie on the server
       await fetch('/api/auth/logout', { method: 'POST' });
-      // FORCE redirect to ensure we leave the page
+      // 2. Force browser to reload at the login page
       window.location.href = '/login'; 
     } catch (error) {
       window.location.href = '/login';
@@ -25,15 +26,15 @@ export default function AdminHeader() {
       </div>
 
       <div className="flex items-center gap-4">
-        {/* Onboard Button - Styled nicely */}
+        {/* Simple, Professional "Add Admin" Button */}
         <button 
           onClick={() => router.push('/onboard')}
-          className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-indigo-100 transition shadow-sm border border-indigo-100"
+          className="bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-indigo-100 transition shadow-sm border border-indigo-100"
         >
-          <span>✨</span> Add Admin
+          Add Admin
         </button>
 
-        {/* Logout Button - Styled nicely */}
+        {/* Clean Logout Button */}
         <button 
           onClick={() => setShowLogoutConfirm(true)}
           className="bg-red-50 text-red-600 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-red-100 transition border border-red-100 shadow-sm"
@@ -45,7 +46,7 @@ export default function AdminHeader() {
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-8 w-96 shadow-2xl transform transition-all scale-100">
+          <div className="bg-white rounded-xl p-8 w-96 shadow-2xl">
             <h3 className="text-xl font-bold mb-2 text-gray-900">Sign Out?</h3>
             <p className="text-gray-500 mb-8">You will need to log in again to access the dashboard.</p>
             <div className="flex justify-end gap-3">
@@ -59,7 +60,7 @@ export default function AdminHeader() {
                 onClick={handleLogout}
                 className="px-5 py-2.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 shadow-lg transition"
               >
-                Logout Now
+                Logout
               </button>
             </div>
           </div>

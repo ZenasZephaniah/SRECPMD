@@ -20,20 +20,15 @@ export default function DashboardClient({ products }: { products: any[] }) {
     setEditingProduct(null);
   };
 
+  // Calculate total value safely
   const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock), 0);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto p-8">
         
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Product Management Dashboard</h1>
-            <p className="text-gray-500 text-sm mt-1">Overview of your store's performance</p>
-          </div>
-          <AdminHeader />
-        </div>
+        {/* ✅ FIXED: Old Title Removed. Only AdminHeader remains. */}
+        <AdminHeader />
 
         {/* Navigation Tabs */}
         <div className="flex border-b border-gray-200 mb-8 bg-white rounded-t-xl overflow-hidden shadow-sm">

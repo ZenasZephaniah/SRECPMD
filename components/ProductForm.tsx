@@ -5,22 +5,20 @@ import { CldUploadWidget } from "next-cloudinary";
 import { z } from "zod";
 
 const productSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 chars"),
-  category: z.string().min(3, "Category required"),
-  price: z.coerce.number().min(1, "Price must be at least $1"),
-  stock: z.coerce.number().min(0, "Stock cannot be negative"),
-  sales: z.coerce.number().min(0, "Sales cannot be negative").optional(), // New Sales Field
+  name: z.string().min(1, "Name is required"), // Min 1 char
+  category: z.string().optional(), // Optional
+  price: z.coerce.number().min(0, "Price must be 0 or more"), // Min 0
+  stock: z.coerce.number().min(0, "Stock must be 0 or more"), // Min 0
+  sales: z.coerce.number().min(0, "Sales cannot be negative").optional(),
   description: z.string().optional(),
 });
 
-// Props to accept editing data
 export default function ProductForm({ initialData, onCancel }: { initialData?: any, onCancel?: () => void }) {
   const router = useRouter();
   const [formData, setFormData] = useState({ name: "", category: "", price: "", stock: "", sales: "", description: "", imageUrl: "" });
   const [errors, setErrors] = useState<any>({});
   const [status, setStatus] = useState<"idle" | "saving" | "success">("idle");
 
-  // Populate form when editing
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -33,7 +31,6 @@ export default function ProductForm({ initialData, onCancel }: { initialData?: a
         imageUrl: initialData.imageUrl || "",
       });
     } else {
-      // Reset if not editing
       setFormData({ name: "", category: "", price: "", stock: "", sales: "", description: "", imageUrl: "" });
     }
   }, [initialData]);
@@ -52,7 +49,6 @@ export default function ProductForm({ initialData, onCancel }: { initialData?: a
     setErrors({});
     setStatus("saving");
 
-    // DECIDE: Create (POST) or Update (PUT)
     const url = initialData ? `/api/products/${initialData._id}` : "/api/products";
     const method = initialData ? "PUT" : "POST";
 
@@ -69,7 +65,7 @@ export default function ProductForm({ initialData, onCancel }: { initialData?: a
       setStatus("success");
       setTimeout(() => {
         setStatus("idle");
-        if(initialData && onCancel) onCancel(); // Exit edit mode after save
+        if(initialData && onCancel) onCancel(); 
       }, 2000);
     }
   };
@@ -88,35 +84,36 @@ export default function ProductForm({ initialData, onCancel }: { initialData?: a
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Name</label>
+            <label className="text-xs font-bold text-gray-500 uppercase">Name <span className="text-red-500">*</span></label>
             <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
             {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Category</label>
+            <label className="text-xs font-bold text-gray-500 uppercase">Category <span className="text-gray-400 font-normal lowercase">(optional)</span></label>
             <input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
-            {errors.category && <p className="text-red-500 text-xs">{errors.category}</p>}
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Price ($)</label>
-            <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
+            <label className="text-xs font-bold text-gray-500 uppercase">Price ($) <span className="text-red-500">*</span></label>
+            <input type="number" min="0" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
+            {errors.price && <p className="text-red-500 text-xs">{errors.price}</p>}
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Stock</label>
-            <input type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
+            <label className="text-xs font-bold text-gray-500 uppercase">Stock <span className="text-red-500">*</span></label>
+            <input type="number" min="0" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
+            {errors.stock && <p className="text-red-500 text-xs">{errors.stock}</p>}
           </div>
         </div>
 
         <div>
-           <label className="text-xs font-bold text-gray-500 uppercase">Units Sold (Sales)</label>
-           <input type="number" value={formData.sales} onChange={e => setFormData({...formData, sales: e.target.value})} className="w-full border p-2 rounded bg-gray-50" placeholder="Optional" />
+           <label className="text-xs font-bold text-gray-500 uppercase">Sales (Units Sold) <span className="text-gray-400 font-normal lowercase">(optional)</span></label>
+           <input type="number" min="0" value={formData.sales} onChange={e => setFormData({...formData, sales: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
         </div>
 
         <div>
-          <label className="text-xs font-bold text-gray-500 uppercase">Description</label>
+          <label className="text-xs font-bold text-gray-500 uppercase">Description <span className="text-gray-400 font-normal lowercase">(optional)</span></label>
           <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border p-2 rounded bg-gray-50 h-20" />
         </div>
 

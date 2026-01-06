@@ -9,39 +9,34 @@ export default function AdminHeader() {
 
   const handleLogout = async () => {
     try {
-     
       await fetch('/api/auth/logout', { method: 'POST' });
-      
-      
-      router.push('/login');
-      router.refresh(); 
+      // FORCE redirect to ensure we leave the page
+      window.location.href = '/login'; 
     } catch (error) {
-      console.error('Logout failed', error);
-      
-      router.push('/login');
+      window.location.href = '/login';
     }
   };
 
   return (
-    <header className="bg-white shadow-sm py-4 px-6 flex justify-between items-center mb-6">
+    <header className="bg-white shadow-sm py-4 px-8 flex justify-between items-center mb-8 rounded-lg">
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Product Management Dashboard</h1>
-        <p className="text-gray-500 text-sm">Overview of your store's performance</p>
+        <h1 className="text-2xl font-extrabold text-gray-800 tracking-tight">Dashboard</h1>
+        <p className="text-gray-500 text-xs font-medium uppercase tracking-wide mt-1">Store Overview</p>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Onboard Admin Button */}
+      <div className="flex items-center gap-4">
+        {/* Onboard Button - Styled nicely */}
         <button 
           onClick={() => router.push('/onboard')}
-          className="bg-purple-100 text-purple-700 px-4 py-2 rounded-md font-medium text-sm hover:bg-purple-200 transition"
+          className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-indigo-100 transition shadow-sm border border-indigo-100"
         >
-          Add New Admin
+          <span>✨</span> Add Admin
         </button>
 
-        {/* Logout Button */}
+        {/* Logout Button - Styled nicely */}
         <button 
           onClick={() => setShowLogoutConfirm(true)}
-          className="bg-red-50 text-red-600 px-4 py-2 rounded-md font-medium text-sm hover:bg-red-100 transition border border-red-200"
+          className="bg-red-50 text-red-600 px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-red-100 transition border border-red-100 shadow-sm"
         >
           Logout
         </button>
@@ -49,22 +44,22 @@ export default function AdminHeader() {
 
       {/* Logout Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 shadow-xl">
-            <h3 className="text-lg font-bold mb-2">Confirm Logout</h3>
-            <p className="text-gray-600 mb-6">Are you sure you want to exit the dashboard?</p>
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-8 w-96 shadow-2xl transform transition-all scale-100">
+            <h3 className="text-xl font-bold mb-2 text-gray-900">Sign Out?</h3>
+            <p className="text-gray-500 mb-8">You will need to log in again to access the dashboard.</p>
             <div className="flex justify-end gap-3">
               <button 
                 onClick={() => setShowLogoutConfirm(false)}
-                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded"
+                className="px-5 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition"
               >
                 Cancel
               </button>
               <button 
                 onClick={handleLogout}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className="px-5 py-2.5 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 shadow-lg transition"
               >
-                Logout
+                Logout Now
               </button>
             </div>
           </div>

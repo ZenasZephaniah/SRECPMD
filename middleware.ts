@@ -13,8 +13,15 @@ export function middleware(request: NextRequest) {
   if (isPublicPath && token) {
     return NextResponse.redirect(new URL('/', request.nextUrl));
   }
+
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/', '/login'],
+  matcher: [
+    '/',
+    '/login',
+    '/onboard',
+    '/api/admin/:path*'
+  ],
 };

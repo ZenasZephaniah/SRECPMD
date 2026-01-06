@@ -17,20 +17,21 @@ export default function AdminHeader() {
   };
 
   return (
-    // Outer container with spacing to separate Title from Buttons
     <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
       
-      {/* LEFT SIDE: Clean Title (Subtitle removed as requested) */}
+      {/* LEFT SIDE: Title + Uppercase Subtitle */}
       <div>
         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
           Product Management Dashboard
         </h1>
+        <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1 ml-1">
+          INVENTORY OVERVIEW
+        </p>
       </div>
 
-      {/* RIGHT SIDE: The "White Box" Control Bar containing ONLY buttons */}
-      <div className="bg-white shadow-sm border border-gray-100 py-2 px-3 rounded-xl flex items-center gap-3">
+      {/* RIGHT SIDE: Control Bar (Buttons ONLY - No text) */}
+      <div className="bg-white shadow-sm border border-gray-100 py-2 px-4 rounded-xl flex items-center gap-3">
         
-        {/* Add Admin Button */}
         <button 
           onClick={() => router.push('/onboard')}
           className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-bold text-sm hover:bg-indigo-100 transition"
@@ -41,7 +42,6 @@ export default function AdminHeader() {
         {/* Divider Line */}
         <div className="h-6 w-px bg-gray-200"></div>
 
-        {/* Logout Button */}
         <button 
           onClick={() => setShowLogoutConfirm(true)}
           className="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-100 transition"

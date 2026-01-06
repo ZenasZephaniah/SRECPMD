@@ -1,23 +1,28 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get('auth_token');
-  const { pathname } = req.nextUrl;
+export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  const isPublicPath = path === '/login';
+  const token = request.cookies.get('token')?.value;
 
-  // If trying to access dashboard ('/') without token, go to login
-  if (pathname === '/' && !token) {
-    return NextResponse.redirect(new URL('/login', req.url));
+  if (!isPublicPath && !token) {
+    return NextResponse.redirect(new URL('/login', request.nextUrl));
   }
 
-  // If already logged in and trying to access login, go to dashboard
-  if (pathname === '/login' && token) {
-    return NextResponse.redirect(new URL('/', req.url));
+  if (isPublicPath && token) {
+    return NextResponse.redirect(new URL('/', request.nextUrl));
   }
-
+  
+  
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/', '/login'],
+  matcher: [
+    '/', 
+    '/login', 
+    '/onboard', 
+    '/api/admin/:path*' 
+  ],
 };

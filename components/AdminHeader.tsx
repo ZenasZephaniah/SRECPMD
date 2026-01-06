@@ -22,15 +22,16 @@ export default function AdminHeader() {
   return (
     <>
       <div className="flex gap-3">
+        {/* UPDATED BUTTON TEXT */}
         <button onClick={generateInvite} className="bg-purple-100 text-purple-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-200 transition-colors">
-          + Onboard Admin
+          Add New Admin
         </button>
         <button onClick={() => setShowLogoutModal(true)} className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-100 transition-colors border border-red-200">
           Logout
         </button>
       </div>
 
-      {/* Logout Modal Overlay */}
+      {/* Logout Modal */}
       {showLogoutModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4">
@@ -44,13 +45,11 @@ export default function AdminHeader() {
         </div>
       )}
 
-      {/* Onboard Modal Overlay */}
+      {/* Onboard Modal */}
       {showOnboardModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full mx-4 text-center">
-            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              🔐
-            </div>
+            <div className="w-12 h-12 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">🔐</div>
             <h3 className="text-lg font-bold mb-2">Admin Invite Generated</h3>
             <p className="text-gray-500 mb-4 text-sm">Share this secure code with the new administrator:</p>
             <div className="bg-gray-100 p-3 rounded-lg font-mono text-xl font-bold tracking-wider mb-6 border border-dashed border-gray-300">

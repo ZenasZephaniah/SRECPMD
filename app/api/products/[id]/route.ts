@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Product from "@/models/Product";
 
+// Fix: Define params as a Promise
+type Props = {
+  params: Promise<{ id: string }>;
+};
+
 // DELETE Product
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: Props) {
   try {
+    const { id } = await params; // Await the params
     await connectDB();
-    // Await params to fix Next.js 15 sync/async issue
-    const { id } = await params;
     await Product.findByIdAndDelete(id);
     return NextResponse.json({ message: "Product deleted" }, { status: 200 });
   } catch (error) {
@@ -15,10 +19,10 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   }
 }
 
-// UPDATE Product (New)
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+// UPDATE Product
+export async function PUT(req: Request, { params }: Props) {
   try {
-    const { id } = await params;
+    const { id } = await params; // Await the params
     const body = await req.json();
     await connectDB();
     const updatedProduct = await Product.findByIdAndUpdate(id, body, { new: true });

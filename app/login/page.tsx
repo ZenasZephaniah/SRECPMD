@@ -40,7 +40,6 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <form onSubmit={handleSubmit} className="bg-white shadow-2xl rounded-lg px-8 pt-8 pb-8 mb-4">
           
-          {/* Secure Header Section */}
           <div className="text-center mb-8">
              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-4">
                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8 text-blue-800">
@@ -91,7 +90,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className={`w-full bg-blue-800 hover:bg-blue-900 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline transition duration-200 uppercase tracking-wider text-sm ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isLoading ? 'Verifying...' : 'Sign In Securely'}
+              {isLoading ? 'Verifying...' : 'Login'}
             </button>
           </div>
         </form>

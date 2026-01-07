@@ -67,23 +67,24 @@ Open your terminal and clone the repository:
 ```bash
 git clone [https://github.com/ZenasZephaniah/SRECPMD.git](https://github.com/ZenasZephaniah/SRECPMD.git)
 cd SRECPMD
-Step 2: Install Dependencies
+```
+
+### Step 2: Install Dependencies
 Install the necessary Node.js packages:
-
-Bash
-
+```bash
 npm install
-Step 3: Configure Environment Variables
+```
+
+### Step 3: Configure Environment Variables
 Create a .env.local file in the root directory and add your connection strings:
-
-Code snippet
-
+```Code snippet
 MONGODB_URI=your_mongodb_connection_string
 NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
-Step 4: Run the Development Server
+```
+
+### Step 4: Run the Development Server
 Start the local server:
-
-Bash
-
+```bash
 npm run dev
+```
 Once running, open http://localhost:3000 in your browser.

@@ -1,24 +1,27 @@
 "use client";
+
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { CldUploadWidget } from "next-cloudinary";
-import { z } from "zod";
 
-const productSchema = z.object({
-  name: z.string().min(1, "Name is required"), // Min 1 char
-  category: z.string().optional(), // Optional
-  price: z.coerce.number().min(0, "Price must be 0 or more"), // Min 0
-  stock: z.coerce.number().min(0, "Stock must be 0 or more"), // Min 0
-  sales: z.coerce.number().min(0, "Sales cannot be negative").optional(),
-  description: z.string().optional(),
-});
+interface ProductFormProps {
+  initialData?: any;
+  onCancel: () => void;
+}
 
-export default function ProductForm({ initialData, onCancel }: { initialData?: any, onCancel?: () => void }) {
-  const router = useRouter();
-  const [formData, setFormData] = useState({ name: "", category: "", price: "", stock: "", sales: "", description: "", imageUrl: "" });
-  const [errors, setErrors] = useState<any>({});
-  const [status, setStatus] = useState<"idle" | "saving" | "success">("idle");
+export default function ProductForm({ initialData, onCancel }: ProductFormProps) {
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    price: "",
+    stock: "",
+    sales: "",
+    description: "",
+    image: "", // This stores the URL
+  });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Load initial data if editing
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -28,114 +31,180 @@ export default function ProductForm({ initialData, onCancel }: { initialData?: a
         stock: initialData.stock || "",
         sales: initialData.sales || "",
         description: initialData.description || "",
-        imageUrl: initialData.imageUrl || "",
+        image: initialData.image || "",
       });
-    } else {
-      setFormData({ name: "", category: "", price: "", stock: "", sales: "", description: "", imageUrl: "" });
     }
   }, [initialData]);
 
-  const handleSubmit = async (e: any) => {
+  const handleChange = (e: any) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = productSchema.safeParse(formData);
-    
-    if (!result.success) {
-      const formattedErrors: any = {};
-      result.error.issues.forEach((issue) => { formattedErrors[issue.path[0]] = issue.message; });
-      setErrors(formattedErrors);
-      return;
-    }
-    
-    setErrors({});
-    setStatus("saving");
+    setIsSubmitting(true);
 
     const url = initialData ? `/api/products/${initialData._id}` : "/api/products";
     const method = initialData ? "PUT" : "POST";
 
-    const res = await fetch(url, {
-      method: method,
-      body: JSON.stringify(formData),
-    });
-
-    if (res.ok) {
-      router.refresh();
-      if (!initialData) {
-         setFormData({ name: "", category: "", price: "", stock: "", sales: "", description: "", imageUrl: "" });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      
+      if (res.ok) {
+        window.location.reload(); // Refresh to show new data
       }
-      setStatus("success");
-      setTimeout(() => {
-        setStatus("idle");
-        if(initialData && onCancel) onCancel(); 
-      }, 2000);
+    } catch (error) {
+      console.error("Error saving product", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md h-full relative border border-gray-100">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold text-gray-800">
-          {initialData ? "Edit Product" : "Add New Product"}
-        </h3>
-        {initialData && (
-          <button onClick={onCancel} className="text-xs text-red-500 hover:underline">Cancel Edit</button>
-        )}
-      </div>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Name <span className="text-red-500">*</span></label>
-            <input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
-            {errors.name && <p className="text-red-500 text-xs">{errors.name}</p>}
-          </div>
-          <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Category <span className="text-gray-400 font-normal lowercase">(optional)</span></label>
-            <input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
-          </div>
-        </div>
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <h2 className="text-xl font-bold text-gray-800 mb-6">
+        {initialData ? "Edit Product" : "Add New Product"}
+      </h2>
 
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit}>
+        {/* Name & Category Row */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Price ($) <span className="text-red-500">*</span></label>
-            <input type="number" min="0" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
-            {errors.price && <p className="text-red-500 text-xs">{errors.price}</p>}
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Name <span className="text-red-500">*</span></label>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
+              required
+            />
           </div>
           <div>
-            <label className="text-xs font-bold text-gray-500 uppercase">Stock <span className="text-red-500">*</span></label>
-            <input type="number" min="0" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
-            {errors.stock && <p className="text-red-500 text-xs">{errors.stock}</p>}
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Category (optional)</label>
+            <input
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
+            />
           </div>
         </div>
 
-        <div>
-           <label className="text-xs font-bold text-gray-500 uppercase">Sales (Units Sold) <span className="text-gray-400 font-normal lowercase">(optional)</span></label>
-           <input type="number" min="0" value={formData.sales} onChange={e => setFormData({...formData, sales: e.target.value})} className="w-full border p-2 rounded bg-gray-50" />
+        {/* Price & Stock Row */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Price ($) <span className="text-red-500">*</span></label>
+            <input
+              type="number"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Stock <span className="text-red-500">*</span></label>
+            <input
+              type="number"
+              name="stock"
+              value={formData.stock}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
+              required
+            />
+          </div>
         </div>
 
-        <div>
-          <label className="text-xs font-bold text-gray-500 uppercase">Description <span className="text-gray-400 font-normal lowercase">(optional)</span></label>
-          <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border p-2 rounded bg-gray-50 h-20" />
+        {/* Sales Row */}
+        <div className="mb-4">
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Sales (Units Sold) (optional)</label>
+          <input
+            type="number"
+            name="sales"
+            value={formData.sales}
+            onChange={handleChange}
+            className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
+          />
         </div>
 
-        <CldUploadWidget uploadPreset="ml_default" onSuccess={(result: any) => setFormData(prev => ({ ...prev, imageUrl: result.info.secure_url }))}>
-          {({ open }) => (
-            <button type="button" onClick={() => open()} className="bg-gray-100 text-gray-600 px-4 py-2 rounded text-sm w-full hover:bg-gray-200 border border-dashed border-gray-300">
-              {formData.imageUrl ? "✅ Image Uploaded" : "⬆️ Upload Image"}
-            </button>
+        {/* Description */}
+        <div className="mb-4">
+          <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description (optional)</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows={3}
+            className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
+          />
+        </div>
+
+        {/* IMAGE UPLOAD SECTION */}
+        <div className="mb-6">
+           <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Product Image</label>
+           
+           <CldUploadWidget 
+             uploadPreset="ml_default" // ⚠️ Ensure this matches your Cloudinary Settings if you changed it
+             onSuccess={(result: any) => {
+               // ✅ Capture the URL when upload finishes
+               setFormData(prev => ({ ...prev, image: result.info.secure_url }));
+             }}
+           >
+             {({ open }) => (
+               <div 
+                 onClick={() => open()}
+                 className="cursor-pointer bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center transition"
+               >
+                 {formData.image ? (
+                   // ✅ PREVIEW: If we have an image, show it!
+                   <div className="relative w-full h-32 flex items-center justify-center">
+                      <img 
+                        src={formData.image} 
+                        alt="Preview" 
+                        className="h-full object-contain rounded-md"
+                      />
+                      <p className="absolute bottom-0 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                        Click to Change
+                      </p>
+                   </div>
+                 ) : (
+                   // Show Upload Button if empty
+                   <>
+                     <div className="text-2xl mb-1">📷</div>
+                     <span className="text-sm font-medium text-blue-600">Upload Image</span>
+                   </>
+                 )}
+               </div>
+             )}
+           </CldUploadWidget>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          {initialData && (
+             <button
+               type="button"
+               onClick={onCancel}
+               className="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-lg hover:bg-gray-200 transition"
+             >
+               Cancel
+             </button>
           )}
-        </CldUploadWidget>
-
-        <button type="submit" disabled={status === "saving"} className="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
-          {status === "saving" ? "Processing..." : (initialData ? "Update Product" : "Save Product")}
-        </button>
-      </form>
-
-      {status === "success" && (
-        <div className="absolute inset-0 bg-white/95 flex flex-col items-center justify-center rounded-lg animate-in fade-in z-10">
-          <div className="text-5xl mb-2">🎉</div>
-          <h3 className="text-xl font-bold text-green-600">{initialData ? "Updated!" : "Saved!"}</h3>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 py-3 bg-blue-800 text-white font-bold rounded-lg hover:bg-blue-900 shadow-md transition"
+          >
+            {isSubmitting ? "Saving..." : (initialData ? "Update Product" : "Save Product")}
+          </button>
         </div>
-      )}
+      </form>
     </div>
   );
 }

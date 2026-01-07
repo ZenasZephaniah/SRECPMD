@@ -16,12 +16,11 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
     stock: "",
     sales: "",
     description: "",
-    image: "", // This stores the URL
+    image: "", 
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Load initial data if editing
   useEffect(() => {
     if (initialData) {
       setFormData({
@@ -43,6 +42,13 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // ✅ FINAL SAFETY CHECK: Force positive numbers before sending
+    if (Number(formData.price) < 0 || Number(formData.stock) < 0) {
+        alert("Price and Stock cannot be negative!");
+        return;
+    }
+
     setIsSubmitting(true);
 
     const url = initialData ? `/api/products/${initialData._id}` : "/api/products";
@@ -56,7 +62,7 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
       });
       
       if (res.ok) {
-        window.location.reload(); // Refresh to show new data
+        window.location.reload(); 
       }
     } catch (error) {
       console.error("Error saving product", error);
@@ -104,6 +110,10 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
               name="price"
               value={formData.price}
               onChange={handleChange}
+              min="0"
+              step="0.01"
+             
+              onKeyDown={(e) => ["-", "e", "E"].includes(e.key) && e.preventDefault()} 
               className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
               required
             />
@@ -115,6 +125,10 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
               name="stock"
               value={formData.stock}
               onChange={handleChange}
+              min="0"
+              step="1"
+              
+              onKeyDown={(e) => ["-", ".", "e", "E"].includes(e.key) && e.preventDefault()} 
               className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
               required
             />
@@ -129,6 +143,7 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
             name="sales"
             value={formData.sales}
             onChange={handleChange}
+            min="0"
             className="w-full p-2 border border-gray-200 rounded focus:border-blue-500 focus:ring-0 outline-none transition"
           />
         </div>
@@ -150,9 +165,8 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Product Image</label>
            
            <CldUploadWidget 
-             uploadPreset="default" 
+             uploadPreset="default" // ✅ CORRECT: Matches your Cloudinary screenshot
              onSuccess={(result: any) => {
-               
                setFormData(prev => ({ ...prev, image: result.info.secure_url }));
              }}
            >
@@ -162,7 +176,6 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
                  className="cursor-pointer bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center transition"
                >
                  {formData.image ? (
-                   // ✅ PREVIEW: If we have an image, show it!
                    <div className="relative w-full h-32 flex items-center justify-center">
                       <img 
                         src={formData.image} 
@@ -174,7 +187,6 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
                       </p>
                    </div>
                  ) : (
-                   // Show Upload Button if empty
                    <>
                      <div className="text-2xl mb-1">📷</div>
                      <span className="text-sm font-medium text-blue-600">Upload Image</span>

@@ -1,6 +1,7 @@
 # Server-Rendered E-Commerce Product Management Dashboard
 
 ### [View Live Demo](https://srecpmd-ck1w.vercel.app/)
+### [Watch Demo Video](https://drive.google.com/drive/folders/1bUwnTtpHddiPUENuycenOla6QgEYsLhC?usp=drive_link)
 
 The **Server-Rendered E-Commerce Product Management Dashboard** is a secure, full-stack administrative portal built with **Next.js 15**. It is designed to simplify inventory management for store administrators. This application leverages **Server-Side Rendering (SSR)** to ensure fast page loads, SEO optimization, and reliable data fetching.
 

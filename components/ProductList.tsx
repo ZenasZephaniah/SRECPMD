@@ -5,7 +5,7 @@ interface ProductListProps {
   onEdit: (product: any) => void;
 }
 
-export default function ProductList({ products, onEdit }: ProductListProps) {
+export default function ProductList({ products = [], onEdit }: ProductListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDelete = async (id: string) => {
@@ -40,7 +40,7 @@ export default function ProductList({ products, onEdit }: ProductListProps) {
             <tr key={product._id} className="hover:bg-gray-50 transition">
               <td className="p-4">
                 <div className="flex items-center gap-3">
-                  {/* ✅ LOGIC: Show Real Image OR Default Icon */}
+                  {/* ✅ FINAL LOGIC: Shows Image if it exists, otherwise Box Icon */}
                   {product.image ? (
                     <img 
                       src={product.image} 

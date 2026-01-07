@@ -150,9 +150,9 @@ export default function ProductForm({ initialData, onCancel }: ProductFormProps)
            <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Product Image</label>
            
            <CldUploadWidget 
-             uploadPreset="ml_default" // ⚠️ Ensure this matches your Cloudinary Settings if you changed it
+             uploadPreset="default" 
              onSuccess={(result: any) => {
-               // ✅ Capture the URL when upload finishes
+               
                setFormData(prev => ({ ...prev, image: result.info.secure_url }));
              }}
            >
